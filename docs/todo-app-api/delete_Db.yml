@@ -1,0 +1,15 @@
+info:
+  name: delete_Db
+  type: http
+  seq: 10
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/items/6d30fcfc-c07d-452f-8cc1-b91839566f04"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
