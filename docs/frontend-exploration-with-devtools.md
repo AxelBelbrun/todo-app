@@ -160,9 +160,9 @@ three things at once:
 
 | Question | Your answer |
 | --- | --- |
-| Which of the five `fetch` calls are inside a `useEffect`? | |
-| Are any of them non-`GET`? | |
-| Why does that matter for StrictMode? | |
+| Which of the five `fetch` calls are inside a `useEffect`? | "Greeting" y "ToDoListCard" |
+| Are any of them non-`GET`? | No |
+| Why does that matter for StrictMode? | UseEffect se corre dos veces en StrictMode, si creas o deleteas cosas se haría dos veces y eso es peligroso. |
 
 ### A detail for the sharp-eyed
 
@@ -216,9 +216,9 @@ body: JSON.stringify({
 
 | Question | Your answer |
 | --- | --- |
-| You only changed `completed`. Why does the request also send `name`? | |
-| What did you prove in Bruno about a `PUT` that omits `name`? | |
-| Is this the frontend's problem to solve, or the API's? | |
+| You only changed `completed`. Why does the request also send `name`? | Porque si no el name se sobreescribe y queda sin valor|
+| What did you prove in Bruno about a `PUT` that omits `name`? | Porque, como dije arriba, si se omite lo  toma como vacío y actualiza su valor.|
+| Is this the frontend's problem to solve, or the API's? | Es problema de la API.|
 
 **Stop here and make sure this one has landed, because it is the most important finding in
 this guide.**
@@ -250,8 +250,8 @@ argument entirely.** The app does not care what the server said — only that it
 
 | Question | Your answer |
 | --- | --- |
-| If the delete failed with a 500, would the item disappear from the screen anyway? | |
-| Trace the code to justify your answer. | |
+| If the delete failed with a 500, would the item disappear from the screen anyway? | Sí, porque en el código del front el item se borra independientemente de la respuesta del server|
+| Trace the code to justify your answer. | la parte de .then(() => es la culpable básicamente |
 
 ---
 
@@ -272,9 +272,9 @@ const onNewItem = useCallback((newItem) => {
 
 | Question | Your answer |
 | --- | --- |
-| After adding an item, does the app re-fetch `GET /api/items`? | |
-| After toggling one? After deleting one? | |
-| How many times is `GET /api/items` called in an entire session? | |
+| After adding an item, does the app re-fetch `GET /api/items`? | No |
+| After toggling one? After deleting one? | Tampoco |
+| How many times is `GET /api/items` called in an entire session? | Al principio y nunca más|
 
 The answer to the last one is: **once, on mount.** Forever after, the list on your screen is
 a copy that the browser maintains by hand — appending, replacing by index, splicing.
@@ -297,10 +297,10 @@ first.
 
 | Question | Your answer |
 | --- | --- |
-| What does the screen show? | | 
-| What is actually in the database? | |
-| How long would the screen keep lying? | |
-| What would make it tell the truth again? | |
+| What does the screen show? | Los tres items que se agregaron al principio| 
+| What is actually in the database? | Solamente 2, y uno de ellos con el nombre cambiado|
+| How long would the screen keep lying? | Hasta que se recargue|
+| What would make it tell the truth again? | Recargarla.. |
 
 You have just produced, on demand, the defect behind a huge share of real support tickets:
 **two sources of truth that have drifted apart.** The server has one answer, the browser has
@@ -310,10 +310,10 @@ Now click the checkbox on the item you deleted in Bruno.
 
 | Question | Your prediction | Actual |
 | --- | --- | --- |
-| What request goes out? | | |
-| What status comes back? | | |
-| What does the screen do? | | |
-| What *should* it have done? | | |
+| What request goes out? | Debería salir un PUT | |
+| What status comes back? | Sabiendo que no existe ese item, debería volver un error de los 400's| |
+| What does the screen do? | Muestra información erronea.  | |
+| What *should* it have done? | Desde el principio debería haberse tenido en cuenta la respuesta del servidor, y tratar de arreglar el error en este caso. Pero como se trata a la respuesta de error como si fuera un ítem válido, eso triggerea errores en el código del front | |
 
 Trace it through the code before you decide: `ItemDisplay.jsx:21-23` calls `.then(r => r.json())` and hands the parsed result to `onItemUpdate`. Look at what `PUT` on a nonexistent id returns — you recorded that in the Bruno exercise as defect #4. Then read `onItemUpdate` at `TodoListCard.jsx:21-31` and follow what happens when `findIndex` does not find the id.
 
@@ -335,10 +335,10 @@ Now reload the page.
 
 | Question | Your prediction | Actual |
 | --- | --- | --- |
-| What does the page show? | | |
-| Is there any error message? | | |
-| What does the Network tab show for the two requests? | | |
-| Does the greeting heading appear? | | |
+| What does the page show? | "Loading..." | |
+| Is there any error message? | No, simplemente el Loading que da la impresión de que se está trabajando| |
+| What does the Network tab show for the two requests? | Muestra error en ambas | |
+| Does the greeting heading appear? | No | |
 
 Read `TodoListCard.jsx:41` and `Greeting.jsx:12`:
 
@@ -355,9 +355,9 @@ rg '\.catch' client/src
 
 | Question | Your answer |
 | --- | --- |
-| How many `.catch` handlers are in the frontend? | |
-| So what state does a failed request leave the app in? | |
-| From the user's point of view, is that state distinguishable from "slow"? | |
+| How many `.catch` handlers are in the frontend? | Ninguno |
+| So what state does a failed request leave the app in? | En el último en el que estaba |
+| From the user's point of view, is that state distinguishable from "slow"? | No |
 
 **"Loading…" forever is a lie.** Nothing is loading. The request failed and no one is coming.
 The app has no vocabulary for failure — its only two states are *no data yet* and *data*.
@@ -376,19 +376,19 @@ name and click **Add Item**.
 
 | Question | Your prediction | Actual |
 | --- | --- | --- |
-| What does the button say after you click? | | |
-| Does the text ever change back? | | |
-| Does the typed name get cleared? | | |
-| Can you tell whether the item was created? | | |
+| What does the button say after you click? | Se queda congelado diciendo que está agregando el item | |
+| Does the text ever change back? | No | |
+| Does the typed name get cleared? | No | |
+| Can you tell whether the item was created? | No | |
 
 Read `AddNewItemForm.jsx:11-28` and trace the state. `setSubmitting(true)` happens on line
 13, unconditionally. `setSubmitting(false)` happens **only** inside `.then()`, on line 25.
 
 | Question | Your answer |
 | --- | --- |
-| On failure, which line resets `submitting`? | |
+| On failure, which line resets `submitting`? | Ninguna |
 | So what does the button say, permanently? | |
-| What must the user do to escape that state? | |
+| What must the user do to escape that state? | Recargar la página |
 
 **This is a defect you can find by reading, without running anything.** A state flag set
 before an async call and cleared only on the success path will get stuck on every failure.
@@ -402,8 +402,8 @@ then reload.
 | Question | Your answer |
 | --- | --- |
 | How long does "Loading..." stay on screen? | |
-| Is there any spinner, skeleton, or progress indication? | |
-| Now click **Add Item** twice, quickly. How many `POST` requests go out? | |
+| Is there any spinner, skeleton, or progress indication? | No |
+| Now click **Add Item** twice, quickly. How many `POST` requests go out? | 2 |
 
 That last question deserves its own section.
 
@@ -435,9 +435,9 @@ still holds the typed text, because it is only cleared inside `.then()` on line 
 
 | Question | Your prediction | Actual |
 | --- | --- | --- |
-| Is the button clickable while a submit is in flight? | | |
-| With Slow 3G on, how many `POST`s can you fire from one typed name? | | |
-| How many rows appear in phpMyAdmin? | | |
+| Is the button clickable while a submit is in flight? | Sí | |
+| With Slow 3G on, how many `POST`s can you fire from one typed name? | Tantos como el tiempo te dé hasta que viaje la información completa | |
+| How many rows appear in phpMyAdmin? | Tantas como clicks hiciste | |
 
 Verify it in the Network tab and in phpMyAdmin, then say plainly whether the button is
 protected or merely painted to look protected.
@@ -460,9 +460,9 @@ Then read `ItemDisplay.jsx:33`:
 
 | Question | Your answer |
 | --- | --- |
-| For a completed item, what is the class attribute? | |
-| For an **incomplete** item, what is it? | |
-| Why? Walk through what `false && 'completed'` evaluates to, then what a template literal does with that value. | |
+| For a completed item, what is the class attribute? | completed |
+| For an **incomplete** item, what is it? | False |
+| Why? Walk through what `false && 'completed'` evaluates to, then what a template literal does with that value. | Porque la lógica en JS devuelve directamente un False en un && cuando el primer argumento es False. Y el literal agarra ese valor como string y lo usa|
 
 You should find a CSS class in your live DOM with a name that nobody ever intended to write.
 It is harmless — no stylesheet matches it — but it is the visible fingerprint of a
@@ -486,14 +486,14 @@ seems wrong" is not evidence.**
 
 | # | Defect | Where | Evidence | Correct behavior |
 | --- | --- | --- | --- | --- |
-| 1 | No error handling anywhere; failures look like loading | all 5 `fetch` calls | | |
-| 2 | `submitting` never resets on failure | `AddNewItemForm.jsx:13,25` | | |
-| 3 | Button looks disabled but is clickable → double submit | `AddNewItemForm.jsx:43-44` | | |
-| 4 | Local state never reconciles with the server | `TodoListCard.jsx` | | |
-| 5 | `PUT` resends `name` to work around an API defect, undocumented | `ItemDisplay.jsx:16-19` | | |
-| 6 | Delete updates the UI without checking the response | `ItemDisplay.jsx:27` | | |
-| 7 | Stray `false` class in the DOM | `ItemDisplay.jsx:33` | | |
-| 8 | The only input validation is a button prop | `AddNewItemForm.jsx:43` | | |
+| 1 | No error handling anywhere; failures look like loading | all 5 `fetch` calls | Apagando el backend la página seguía funcionando o mostraba información errónea | Avisar del error al cliente|
+| 2 | `submitting` never resets on failure | `AddNewItemForm.jsx:13,25` | Con el backend apagado el setSubmitting(false) nunca se ejecuta porque no hay error handling| Con un error handling decente se setearía la variable a false pase lo que pase |
+| 3 | Button looks disabled but is clickable → double submit | `AddNewItemForm.jsx:43-44` | Con red lenta se puede clickear tantas veces como tarde en viajar la información | Bloquear el comportamiento realmente desde HTML|
+| 4 | Local state never reconciles with the server | `TodoListCard.jsx` | Si elimino o agrego elementos usando el front pero por otro lado hago requests con Bruno, dejan de tener la misma info el back y el front | No estoy seguro cómo se maneja esto correctamente |
+| 5 | `PUT` resends `name` to work around an API defect, undocumented | `ItemDisplay.jsx:16-19` | Se ve en el payload que lo está enviando | La API debería mejorarse y así se evitaría este parche por parte del front |
+| 6 | Delete updates the UI without checking the response | `ItemDisplay.jsx:27` | En el código se ve que no importa lo que el server responda, se hace lo mismo siempre. Se asume que todo salió bien| Error handling |
+| 7 | Stray `false` class in the DOM | `ItemDisplay.jsx:33` | Aparece en Elements | Se da porque se usa mal la lógica booleana.|
+| 8 | The only input validation is a button prop | `AddNewItemForm.jsx:43` | Puedo saltearme ese "arreglo" mandando requests por Bruno | La validación tiene que venir de parte de la API |
 
 ## The two questions that matter
 
@@ -502,10 +502,10 @@ the API accepted it. Here, the UI prevents empty names with `disabled={!newItem.
 
 | Question | Your answer |
 | --- | --- |
-| So does this system validate input, or not? | |
-| Which layer is doing it? | |
-| Who controls that layer — you, or whoever is using the app? | |
-| Write the shortest possible explanation of why frontend validation is not validation. | |
+| So does this system validate input, or not? | No|
+| Which layer is doing it? | El FRONT |
+| Who controls that layer — you, or whoever is using the app? | Quien sea que esté usando la app|
+| Write the shortest possible explanation of why frontend validation is not validation. | Porque siempre se puede pasar por encima de lo que haya definido el prompt haciendo requests directos, así que todo lo que sea un defecto en el back lo va a seguir siendo hasta que se arregle. Parchearlo en el front no soluciona nada|
 
 Frontend validation is a **convenience for honest users**. It is not a defence. Anyone with
 DevTools, `curl`, or Bruno — which is now all three of you — walks straight past it. You have
@@ -517,7 +517,7 @@ omit them; the code simply never considered failure at all.
 
 | Question | Your answer |
 | --- | --- |
-| Name the one habit that would have prevented most of this table. | |
+| Name the one habit that would have prevented most of this table. | Modelar y documentar correctamente. O no escribir los error handlings correspondientes |
 
 ---
 
