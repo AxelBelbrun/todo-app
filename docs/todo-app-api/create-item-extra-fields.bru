@@ -1,0 +1,19 @@
+meta {
+  name: Create Item - Extra Fields
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/items
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Sneaky item",
+    "id": "i-picked-this-id-myself",
+    "completed": true
+  }
+}

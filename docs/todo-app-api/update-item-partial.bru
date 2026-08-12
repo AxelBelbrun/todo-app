@@ -1,0 +1,17 @@
+meta {
+  name: Update Item - Partial
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}/api/items/63618fbe-f4dd-48e1-ae11-5c8b22cecdce
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "completed": false
+  }
+}

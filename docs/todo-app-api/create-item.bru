@@ -1,0 +1,17 @@
+meta {
+  name: Create Item
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/items
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Learn how HTTP actually works"
+  }
+}

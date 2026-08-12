@@ -1,0 +1,18 @@
+meta {
+  name: Update Item - Non Existent
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{baseUrl}}/api/items/this-id-does-not-exist
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Does not exist",
+    "completed": false
+  }
+}

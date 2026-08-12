@@ -1,0 +1,18 @@
+meta {
+  name: Update Item
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/items/63618fbe-f4dd-48e1-ae11-5c8b22cecdce
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Learn how HTTP actually works",
+    "completed": true
+  }
+}
